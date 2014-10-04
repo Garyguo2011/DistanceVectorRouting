@@ -19,12 +19,12 @@ import scenarios
 
 time.sleep(1) # Wait a sec for log client to maybe connect
 
-import scenarios.linear as scenario
-#import scenarios.candy as scenario
+# import scenarios.linear as scenario
+import scenarios.candy as scenario
 
 from sim.basics import BasicHost
-# scenario.create(switch_type = switch)
-scenario.create(switch_type = switch,host_type=BasicHost,n=4)
+scenario.create(switch_type = switch)
+# scenario.create(switch_type = switch,host_type=BasicHost,n=4)
 
 # Import some stuff to use from the interpreter
 import sim.basics as basics
