@@ -8,18 +8,20 @@ class DVRouter (Entity):
     def __init__(self):
         # Add your code here!
         # neighbor_list <neighbor, (port , distance)>
-        # self.neighbor_list = {str(self.name): 0}
         self.neighbor_list = {}
         # distance_Vector - <(src, des), distance>
-        # self.distance_Vector = {(str(self.name), str(self.name)): 0}
         self.distance_Vector = {}
         # forward_table - < destination, port_number >
-        # self.forward_table = {str(self.name): (None, 0)}
         self.forward_table = {}
         
 
     def handle_rx (self, packet, port):
         # Add your code here!
+        if (len(self.neighbor_list) == 0 and len(self.distance_Vector) == 0 and len(self.forward_table) == 0):
+            self.neighbor_list[str(self.name)] = (None, 0)
+            self.distance_Vector[(str(self.name),str(self.name))] = 0
+            self.forward_table[str(self.name)] = None
+
         if type(packet) is DiscoveryPacket:
             self.handle_discoveryPacket(packet,port)
             # print ("Router: {3} DiscoveryPacket: {0} -> {1}: Latency: {2}".format(packet.src.name, packet.dst, packet.latency, str(self.name)))
@@ -93,8 +95,8 @@ class DVRouter (Entity):
                                 updatePacket.add_destination(destination, self.neighbor_list[destination][1])
                                 # cancel poisoned reversed
                                 backPacket.add_destination(destination, self.neighbor_list[destination][1])
-                            elif newOption == neighbor_list[destination][1]:
-                                if neighbor_list[destination][0] < port:
+                            elif newOption == self.neighbor_list[destination][1]:
+                                if self.neighbor_list[destination][0] < port:
                                     self.distance_Vector[(me, destination)] = self.neighbor_list[destination][1]
                                     updatePacket.add_destination(destination, self.neighbor_list[destination][1])
                                     # cancel poisoned reversed
