@@ -23,8 +23,8 @@ time.sleep(1) # Wait a sec for log client to maybe connect
 # import scenarios.candy as scenario
 # import scenarios.basecase as scenario
 # import scenarios.simple_weight as scenario
+# import scenarios.section as scenario
 import scenarios.base_weight as scenario
-
 
 from sim.basics import BasicHost
 scenario.create(switch_type = switch)
