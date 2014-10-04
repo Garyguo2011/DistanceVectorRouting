@@ -47,6 +47,7 @@ class DVRouter (Entity):
             if self.distance_Vector.has_key(dv_key):
                 # need more hanle here
                 print("distance_Vector has has_key: {0}".format(dv_key))
+                # New link up
                 # Compare with Distance vector and forwarding table If AC current distance < AC distance at Distance vector: update neede Otherwise no update needed
                 if distance < self.distance_Vector[dv_key]:
                     self.distance_Vector[dv_key] = distance
