@@ -7,28 +7,35 @@ import sim.topo as topo
 def create (switch_type = Hub, host_type = BasicHost):
     """
     Creates a topology with loops that looks like:
-         x ----- y
+     h1--x ----- y
          |       |
+         |       a
          |       |
-         v ----- z
-    with link weight x<->y = 1
-                     y<->z = 3
+         v ----- z--h2
+    with link weight x<->y = 5
+                     y<->a = 3
+                     a<->z = 4
                      z<->v = 1
                      v<->x = 2
     run start()
-        x.ping(z)
+        h1.ping(h2)
     expected path: x -> v -> z
     """
 
-    host_type.create('x')
+    switch_type.create('x')
     switch_type.create('y')
-    host_type.create('z')
+    switch_type.create('z')
     switch_type.create('v')
+    switch_type.create('a')
+    host_type.create('h1')
+    host_type.create('h2')
 
 
-
-    topo.link(x, y, 1)
-    topo.link(y, z, 3)
+    topo.link(x, y, 5)
+    topo.link(y, a, 3)
+    topo.link(a, z, 4)
     topo.link(z, v, 1)
     topo.link(v, x, 2)
+    topo.link(h1, x, 1)
+    topo.link(h2, z, 1)
 
