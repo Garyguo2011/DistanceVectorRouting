@@ -6,7 +6,7 @@ import sim
 from sim.basics import BasicHost, RoutingUpdate, DiscoveryPacket
 import sim.topo as topo
 from sim.api import *
-from rip_router import RIPRouter
+from dv_router import DVRouter
 import sim.topo as topo
 import os
 import time
@@ -71,7 +71,7 @@ class ReceiveEntity (Entity):
             update.add_destination(self.announce[0], self.announce[1])
             self.send(update, flood=True)
 
-def create (switch_type = RIPRouter, host_type = BasicHost):
+def create (switch_type = DVRouter, host_type = BasicHost):
     """
     Creates a topology with loops that looks like:
     h1a    s4--s5           h2a
@@ -80,20 +80,30 @@ def create (switch_type = RIPRouter, host_type = BasicHost):
        /  \      /     \    \    
     h1b    --s3--       s8--s9--h2b
     """
-    switch_type.create('s1')
-    switch_type.create('s2')
-    switch_type.create('s3')
 
-    host_type.create('ho')
+    switch_type.create('x')
+    switch_type.create('y')
+    switch_type.create('z')
+    host_type.create('h1')
+    host_type.create('h2')
 
-    topo.link(s1, ho)
+    ReceiveEntity.create('sneakylistener', [x, z] , [h2, 1], 5)
 
-    topo.link(s1, s2)
-    topo.link(s2, s3)
-    topo.link(s1, s3)
+    topo.link(x, y, 2)
+    topo.link(y, z, 1)
+    topo.link(x, z, 7)
+    topo.link(h1, x, 1)
+    topo.link(h2, sneakylistener, 1)
+    topo.link(z, sneakylistener, 1)
+
+
+    
+
+    
+
 
 import sim.core
-from rip_router import RIPRouter as switch
+from dv_router import DVRouter as switch
 
 import sim.api as api
 import logging
@@ -105,13 +115,23 @@ _DISABLE_CONSOLE_LOG = True
 create(switch)
 start = sim.core.simulate
 start()
-
 time.sleep(20)
-
-topo.unlink(s1, ho)
-
-time.sleep(100)
-
-
-print("OVER")
+topo.unlink(y, z)
+topo.link(y, z, 2)
+topo.unlink(x, z)
+topo.link(x, z, 2)
+topo.unlink(x, y)
+topo.link(x, y, 1)
+time.sleep(20)
+h1.ping(h2)
+print("first ping sent")
+time.sleep(30)
+h1.ping(h2)
+print("second ping sent")
+time.sleep(30)
+h1.ping(h2)
+print("third ping sent")
+time.sleep(30)
+print("TIMEOUT")
 os._exit(50)
+
