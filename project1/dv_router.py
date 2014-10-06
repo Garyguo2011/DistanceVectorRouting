@@ -68,7 +68,6 @@ class DVRouter (Entity):
                         if (self.neighbor_list.has_key(k) and 
                             (self.neighbor_list[k][1] < self.distance_Vector[(me, k)]) or
                              (self.neighbor_list[k][1] == self.distance_Vector[(me, k)] and self.neighbor_list[k][0] < self.forward_table[k])):
-                            print("reach here")
                             self.distance_Vector[(me, k)] = self.neighbor_list[k][1]
                             self.forward_table[k] = self.neighbor_list[k][0]
                         changes[k] = (self.forward_table[k], self.distance_Vector[(me, k)])
@@ -164,8 +163,8 @@ class DVRouter (Entity):
                 
     def handle_otherPacket (self, packet, port):
         # how to deal with ttl
-        if packet.dst != self and self.forward_table.has_key(packet.dst):
-                self.send(packet, self.forward_table[packet.dst], flood=False)
+        if packet.dst != self and self.distance_Vector[(self, packet.dst)] != float('inf'):
+            self.send(packet, self.forward_table[packet.dst], flood=False)
 
     def detail(self):
         print("----------------------------------")
