@@ -27,13 +27,13 @@ class DVRouter (Entity):
         if type(packet) is DiscoveryPacket:
             self.handle_discoveryPacket(packet,port)
             # if (packet.src == 'h1a'):
-            # print ("*******Router: {3} DiscoveryPacket: {0} -> {1}: Latency: {2}".format(packet.src, packet.dst, packet.latency, self))
+            print ("*******Router: {3} DiscoveryPacket: {0} -> {1}: Latency: {2}".format(packet.src, packet.dst, packet.latency, self))
             # self.detail()
         elif type(packet) is RoutingUpdate:
-            # print ("Router: {2} RoutingUpdate: {0} -> {1}".format(packet.src, packet.dst, self))
-            # print(packet.str_routing_table())
-            # print("before")
-            # self.detail()
+            print ("Router: {2} RoutingUpdate: {0} -> {1}".format(packet.src, packet.dst, self))
+            print(packet.str_routing_table())
+            print("before")
+            self.detail()
             # if self == "x" or self == "y":
                 # print ("Router: {2} RoutingUpdate: {0} -> {1}".format(packet.src, packet.dst, self))
                 # print("before")
@@ -43,9 +43,9 @@ class DVRouter (Entity):
                 # print("##################################")
                 # self.detail()
             self.handle_RoutingUpdatePacket(packet,port)
-            # print("after")
+            print("after")
             # if self == "x" or self == "y":
-            # self.detail()
+            self.detail()
             
             # self.detail()
         else:
@@ -65,9 +65,10 @@ class DVRouter (Entity):
                 for k, v in self.forward_table.items():
                     if v == port:
                         self.distance_Vector[(me, k)] += change
-                        if (self.neighbor_list.has_key[k] and 
+                        if (self.neighbor_list.has_key(k) and 
                             (self.neighbor_list[k][1] < self.distance_Vector[(me, k)]) or
                              (self.neighbor_list[k][1] == self.distance_Vector[(me, k)] and self.neighbor_list[k][0] < self.forward_table[k])):
+                            print("reach here")
                             self.distance_Vector[(me, k)] = self.neighbor_list[k][1]
                             self.forward_table[k] = self.neighbor_list[k][0]
                         changes[k] = (self.forward_table[k], self.distance_Vector[(me, k)])
@@ -114,7 +115,7 @@ class DVRouter (Entity):
                 if self.neighbor_list.has_key(dst) and self.neighbor_list[dst][1] < self.distance_Vector[(me, dst)]:
                     self.distance_Vector[(me, dst)] = self.neighbor_list[dst][1]
                     self.forward_table[dst] = self.neighbor_list[dst][0]
-                    changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
+                changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
         changes = dict(changes.items() + self.calculateDV().items())
         self.sendRoutingUpdate(changes)
 
@@ -152,10 +153,6 @@ class DVRouter (Entity):
                 self.send(updatePacket, port, flood=False)
                 # if self == "x":
                 #     print('in sendRoutingUpdate',port, updatePacket.str_routing_table())
-
-        
-            
-
             # otherUpdate = RoutingUpdate()
             # for k, v in changes.items():
             #     otherUpdate.add_destination(k, v[1])
