@@ -136,6 +136,12 @@ class DVRouter (Entity):
                     self.distance_Vector[(me, dst)] = option
                     self.forward_table[dst] = self.neighbor_list[src][0]
                     changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
+            if src == me and (self.distance_Vector[(src, dst)] > 50 and self.distance_Vector[(src, dst)] != float('inf')):
+                self.distance_Vector[(src, dst)] = float('inf')
+                self.forward_table[dst] = None
+                changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
+        # if me == "x":
+        #     print('in calculateDV',changes)
         return changes
 
     def sendRoutingUpdate(self, changes):
@@ -158,8 +164,8 @@ class DVRouter (Entity):
                 
     def handle_otherPacket (self, packet, port):
         # how to deal with ttl
-        if packet.dst != self and self.distance_Vector[(self, packet.dst)] != float('inf'):
-            self.send(packet, self.forward_table[packet.dst], flood=False)
+        if packet.dst != self and self.forward_table.has_key(packet.dst):
+                self.send(packet, self.forward_table[packet.dst], flood=False)
 
     def detail(self):
         print("----------------------------------")
