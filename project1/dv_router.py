@@ -40,9 +40,7 @@ class DVRouter (Entity):
                 for k, v in self.forward_table.items():
                     if v == port:
                         self.distance_Vector[(me, k)] += change
-                        if (self.neighbor_list.has_key[k] and 
-                            (self.neighbor_list[k][1] < self.distance_Vector[(me, k)]) or
-                             (self.neighbor_list[k][1] == self.distance_Vector[(me, k)] and self.neighbor_list[k][0] < self.forward_table[k])):
+                        if (self.neighbor_list.has_key[k] and (self.neighbor_list[k][1] < self.distance_Vector[(me, k)]) or (self.neighbor_list[k][1] == self.distance_Vector[(me, k)] and self.neighbor_list[k][0] < self.forward_table[k])):
                             self.distance_Vector[(me, k)] = self.neighbor_list[k][1]
                             self.forward_table[k] = self.neighbor_list[k][0]
                         changes[k] = (self.forward_table[k], self.distance_Vector[(me, k)])
@@ -99,9 +97,7 @@ class DVRouter (Entity):
             dst = k[1]
             if src != me:
                 option = self.neighbor_list[src][1] + self.distance_Vector[(src, dst)]
-                if ((not self.distance_Vector.has_key((me, dst))) or 
-                    (option < self.distance_Vector[(me, dst)]) or
-                    (option == self.distance_Vector[(me, dst)] and self.neighbor_list[src][0] < self.forward_table[dst])):
+                if ((not self.distance_Vector.has_key((me, dst))) or (option < self.distance_Vector[(me, dst)]) or (option == self.distance_Vector[(me, dst)] and self.neighbor_list[src][0] < self.forward_table[dst])):
                     self.distance_Vector[(me, dst)] = option
                     self.forward_table[dst] = self.neighbor_list[src][0]
                     changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
@@ -125,20 +121,3 @@ class DVRouter (Entity):
     def handle_otherPacket (self, packet, port):
         if packet.dst != self and self.distance_Vector[(self, packet.dst)] != float('inf'):
             self.send(packet, self.forward_table[packet.dst], flood=False)
-
-    def detail(self):
-        print("----------------------------------")
-        print("Router: {0}".format(self))
-        
-        print("neighbor_list:")
-        for k,v in self.neighbor_list.items():
-            print ("{0}: {1}".format(k, v))
-        
-        print("forward_table:")
-        for k,v in self.forward_table.items():
-            print ("{0}: {1}".format(k, v))
-
-        print("distance_Vector:")
-        for k,v in self.distance_Vector.items():
-            print ("{0}: {1}".format(k, v)) 
-        print("----------------------------------")
