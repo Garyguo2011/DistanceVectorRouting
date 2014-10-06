@@ -1,8 +1,6 @@
 from sim.api import *
 from sim.basics import *
 
-import time
-
 '''
 Create your distance vector router in this file.
 '''
@@ -32,7 +30,9 @@ class DVRouter (Entity):
     def handle_discoveryPacket (self, packet, port):
         me = self
         changes = {}
+
         if packet.is_link_up == True:
+
             self.livePort.add(port)
             if self.neighbor_list.has_key(packet.src):
                 change = packet.latency - self.neighbor_list[packet.src][0]
@@ -40,7 +40,7 @@ class DVRouter (Entity):
                 for k, v in self.forward_table.items():
                     if v == port:
                         self.distance_Vector[(me, k)] += change
-                        if (self.neighbor_list.has_key(k) and 
+                        if (self.neighbor_list.has_key[k] and 
                             (self.neighbor_list[k][1] < self.distance_Vector[(me, k)]) or
                              (self.neighbor_list[k][1] == self.distance_Vector[(me, k)] and self.neighbor_list[k][0] < self.forward_table[k])):
                             self.distance_Vector[(me, k)] = self.neighbor_list[k][1]
@@ -80,11 +80,13 @@ class DVRouter (Entity):
         for dst in packet.all_dests():
             self.distance_Vector[(packet.src, dst)] = packet.get_distance(dst)
             if self.forward_table.has_key(dst) and port == self.forward_table[dst]:
-                self.distance_Vector[(me, dst)] = self.neighbor_list[packet.src][1] + self.distance_Vector[(packet.src, dst)]
+                if self.distance_Vector[(me, dst)] != self.neighbor_list[packet.src][1] + self.distance_Vector[(packet.src, dst)]:
+                    self.distance_Vector[(me, dst)] = self.neighbor_list[packet.src][1] + self.distance_Vector[(packet.src, dst)]
+                    changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
                 if self.neighbor_list.has_key(dst) and self.neighbor_list[dst][1] < self.distance_Vector[(me, dst)]:
                     self.distance_Vector[(me, dst)] = self.neighbor_list[dst][1]
                     self.forward_table[dst] = self.neighbor_list[dst][0]
-                changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
+                    changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
         changes = dict(changes.items() + self.calculateDV().items())
         self.sendRoutingUpdate(changes)
 
@@ -97,16 +99,14 @@ class DVRouter (Entity):
             dst = k[1]
             if src != me:
                 option = self.neighbor_list[src][1] + self.distance_Vector[(src, dst)]
-                # print(option)
                 if ((not self.distance_Vector.has_key((me, dst))) or 
                     (option < self.distance_Vector[(me, dst)]) or
                     (option == self.distance_Vector[(me, dst)] and self.neighbor_list[src][0] < self.forward_table[dst])):
                     self.distance_Vector[(me, dst)] = option
                     self.forward_table[dst] = self.neighbor_list[src][0]
                     changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
-            if src == me and (self.distance_Vector[(src, dst)] > 50 and self.distance_Vector[(src, dst)] != float('inf')):
+            if src == me and self.distance_Vector[(src, dst)] > 50 and self.distance_Vector[(src, dst)] != float('inf'):
                 self.distance_Vector[(src, dst)] = float('inf')
-                self.forward_table[dst] = None
                 changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
         return changes
 
@@ -121,8 +121,24 @@ class DVRouter (Entity):
                     else:
                         updatePacket.add_destination(k, v[1])
                 self.send(updatePacket, port, flood=False)
-                
+
     def handle_otherPacket (self, packet, port):
-        # how to deal with ttl
         if packet.dst != self and self.distance_Vector[(self, packet.dst)] != float('inf'):
             self.send(packet, self.forward_table[packet.dst], flood=False)
+
+    def detail(self):
+        print("----------------------------------")
+        print("Router: {0}".format(self))
+        
+        print("neighbor_list:")
+        for k,v in self.neighbor_list.items():
+            print ("{0}: {1}".format(k, v))
+        
+        print("forward_table:")
+        for k,v in self.forward_table.items():
+            print ("{0}: {1}".format(k, v))
+
+        print("distance_Vector:")
+        for k,v in self.distance_Vector.items():
+            print ("{0}: {1}".format(k, v)) 
+        print("----------------------------------")
