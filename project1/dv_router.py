@@ -49,7 +49,7 @@ class DVRouter (Entity):
                         changes[k] = (self.forward_table[k], self.distance_Vector[(me, k)])
             else:
                 self.neighbor_list[packet.src] = (port, packet.latency)
-                if (not self.distance_Vector.has_key((me, packet.src))) or (self.neighbor_list[packet.src][1] < self.distance_Vector[(me, packet.src)]) or (self.neighbor_list[packet.src][1] == self.distance_Vector[(me, packet.src)] and port < self.forward_table[packet.src][0]):
+                if (not self.distance_Vector.has_key((me, packet.src))) or (self.neighbor_list[packet.src][1] < self.distance_Vector[(me, packet.src)]) or (self.neighbor_list[packet.src][1] == self.distance_Vector[(me, packet.src)] and port < self.forward_table[packet.src]):
                     self.distance_Vector[(me, packet.src)] = self.neighbor_list[packet.src][1]
                     self.forward_table[packet.src] = port
                     changes[packet.src] = (self.forward_table[packet.src], self.distance_Vector[(me, packet.src)])
