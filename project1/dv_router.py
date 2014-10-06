@@ -30,9 +30,12 @@ class DVRouter (Entity):
     def handle_discoveryPacket (self, packet, port):
         me = self
         changes = {}
+        
+        # clean up garbage
+        if self.neighbor_list.has_key(packet.src) and self.neighbor_list[packet.src][1] == float('inf'):
+            self.neighbor_list.pop(packet.src)
 
         if packet.is_link_up == True:
-
             self.livePort.add(port)
             if self.neighbor_list.has_key(packet.src):
                 change = packet.latency - self.neighbor_list[packet.src][0]
