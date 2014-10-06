@@ -38,7 +38,7 @@ class DVRouter (Entity):
         if packet.is_link_up == True:
             self.livePort.add(port)
             if self.neighbor_list.has_key(packet.src):
-                change = packet.latency - self.neighbor_list[packet.src][0]
+                change = packet.latency - self.neighbor_list[packet.src][1]
                 self.neighbor_list[packet.src] = (port, packet.latency)
                 for k, v in self.forward_table.items():
                     if v == port:
