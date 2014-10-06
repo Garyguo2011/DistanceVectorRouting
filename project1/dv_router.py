@@ -136,8 +136,6 @@ class DVRouter (Entity):
                     self.distance_Vector[(me, dst)] = option
                     self.forward_table[dst] = self.neighbor_list[src][0]
                     changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
-        # if me == "x":
-        #     print('in calculateDV',changes)
         return changes
 
     def sendRoutingUpdate(self, changes):
@@ -160,7 +158,7 @@ class DVRouter (Entity):
                 
     def handle_otherPacket (self, packet, port):
         # how to deal with ttl
-        if packet.dst != self:
+        if packet.dst != self and self.distance_Vector[(self, packet.dst)] != float('inf'):
             self.send(packet, self.forward_table[packet.dst], flood=False)
 
     def detail(self):
