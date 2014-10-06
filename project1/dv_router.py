@@ -8,7 +8,6 @@ Create your distance vector router in this file.
 '''
 class DVRouter (Entity):
     def __init__(self):
-        # Add your code here!
         # neighbor_list <neighbor, (port , distance)>
         self.neighbor_list = {}
         # distance_Vector - <(src, des), distance>
@@ -23,41 +22,17 @@ class DVRouter (Entity):
             self.neighbor_list[self] = (None, 0)
             self.distance_Vector[(self,self)] = 0
             self.forward_table[self] = None
-
         if type(packet) is DiscoveryPacket:
             self.handle_discoveryPacket(packet,port)
-            # if (packet.src == 'h1a'):
-            print ("*******Router: {3} DiscoveryPacket: {0} -> {1}: Latency: {2}".format(packet.src, packet.dst, packet.latency, self))
-            # self.detail()
         elif type(packet) is RoutingUpdate:
-            print ("Router: {2} RoutingUpdate: {0} -> {1}".format(packet.src, packet.dst, self))
-            print(packet.str_routing_table())
-            print("before")
-            self.detail()
-            # if self == "x" or self == "y":
-                # print ("Router: {2} RoutingUpdate: {0} -> {1}".format(packet.src, packet.dst, self))
-                # print("before")
-                # self.detail()
-            # self.detail()
-            # if packet.str_routing_table() == "{'h1': 1}":
-                # print("##################################")
-                # self.detail()
             self.handle_RoutingUpdatePacket(packet,port)
-            print("after")
-            # if self == "x" or self == "y":
-            self.detail()
-            
-            # self.detail()
         else:
             self.handle_otherPacket(packet,port)
-
 
     def handle_discoveryPacket (self, packet, port):
         me = self
         changes = {}
-
         if packet.is_link_up == True:
-            # increase 
             self.livePort.add(port)
             if self.neighbor_list.has_key(packet.src):
                 change = packet.latency - self.neighbor_list[packet.src][0]
@@ -96,12 +71,7 @@ class DVRouter (Entity):
                                 changes[k] = (self.forward_table[k], self.distance_Vector[(me, k)])
                             else:
                                 changes[k] = (self.forward_table[k], self.distance_Vector[(me, k)])
-                        # else
-                            # do nothing
-
         changes = dict(changes.items() + self.calculateDV().items())
-        # if me == "x":
-            # print("in handle_discoveryPacket", changes)        
         self.sendRoutingUpdate(changes)
 
     def handle_RoutingUpdatePacket (self, packet, port):
@@ -122,7 +92,6 @@ class DVRouter (Entity):
         me = self
         # < destination , (distance, port)>
         changes = {}
-        # self.detail()
         for k in self.distance_Vector.keys():
             src = k[0]
             dst = k[1]
@@ -139,8 +108,6 @@ class DVRouter (Entity):
                 self.distance_Vector[(src, dst)] = float('inf')
                 self.forward_table[dst] = None
                 changes[dst] = (self.forward_table[dst], self.distance_Vector[(me, dst)])
-        # if me == "x":
-        #     print('in calculateDV',changes)
         return changes
 
     def sendRoutingUpdate(self, changes):
@@ -154,31 +121,8 @@ class DVRouter (Entity):
                     else:
                         updatePacket.add_destination(k, v[1])
                 self.send(updatePacket, port, flood=False)
-                # if self == "x":
-                #     print('in sendRoutingUpdate',port, updatePacket.str_routing_table())
-            # otherUpdate = RoutingUpdate()
-            # for k, v in changes.items():
-            #     otherUpdate.add_destination(k, v[1])
-            # self.send(otherUpdate, self.livePort, flood=True)
                 
     def handle_otherPacket (self, packet, port):
         # how to deal with ttl
         if packet.dst != self and self.distance_Vector[(self, packet.dst)] != float('inf'):
             self.send(packet, self.forward_table[packet.dst], flood=False)
-
-    def detail(self):
-        print("----------------------------------")
-        print("Router: {0}".format(self))
-        
-        print("neighbor_list:")
-        for k,v in self.neighbor_list.items():
-            print ("{0}: {1}".format(k, v))
-        
-        print("forward_table:")
-        for k,v in self.forward_table.items():
-            print ("{0}: {1}".format(k, v))
-
-        print("distance_Vector:")
-        for k,v in self.distance_Vector.items():
-            print ("{0}: {1}".format(k, v)) 
-        print("----------------------------------")
